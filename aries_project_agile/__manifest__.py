@@ -24,6 +24,8 @@ Key Features:
     """,
     'author': 'Aries Software',
     'website': 'https://www.aries-software.net',
+    'price': 149.0,
+    'currency': 'EUR',
     'license': 'LGPL-3',
     'category': 'Services/Project',
     'depends': ['project', 'hr_timesheet', 'portal'],
