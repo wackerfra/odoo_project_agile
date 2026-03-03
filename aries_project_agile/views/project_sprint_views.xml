@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_project_sprint_list" model="ir.ui.view">
+        <field name="name">project.sprint.list</field>
+        <field name="model">project.sprint</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="state"/>
+                <field name="capacity_hours"/>
+                <field name="committed_hours"/>
+                <field name="completed_hours"/>
+                <field name="remaining_hours"/>
+                <field name="task_count"/>
+                <field name="done_task_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="view_project_sprint_kanban" model="ir.ui.view">
+        <field name="name">project.sprint.kanban</field>
+        <field name="model">project.sprint</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="project_id" class="o_kanban_small_column">
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_record d-flex flex-column h-100">
+                            <div class="o_kanban_record_top mb-2">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                </div>
+                                <field name="state" widget="label_selection" options="{'classes': {'planned': 'info', 'active': 'success', 'closed': 'default'}}"/>
+                            </div>
+                            <div class="o_kanban_record_body flex-grow-1">
+                                <div class="text-muted">
+                                    <span><field name="start_date"/> - <field name="end_date"/></span>
+                                </div>
+                                <div>
+                                    <span>Tasks: <field name="done_task_count"/> / <field name="task_count"/></span>
+                                </div>
+                                <div>
+                                    <span>Hours: <field name="completed_hours"/> / <field name="committed_hours"/></span>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2 d-flex justify-content-between align-items-center">
+                                <div class="oe_kanban_bottom_left">
+                                    <button name="action_start" type="object" string="Start" invisible="state != 'planned'" class="btn btn-sm btn-primary">Start</button>
+                                    <button name="action_close" type="object" string="Close" invisible="state != 'active'" class="btn btn-sm btn-secondary">Close</button>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="color" widget="color_picker"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_project_sprint_form" model="ir.ui.view">
+        <field name="name">project.sprint.form</field>
+        <field name="model">project.sprint</field>
+        <field name="arch" type="xml">
+            <form string="Sprint">
+                <header>
+                    <button name="action_start" type="object" string="Start" invisible="state != 'planned'" class="btn-primary"/>
+                    <button name="action_close" type="object" string="Close" invisible="state != 'active'" class="btn-secondary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_tasks" icon="fa-tasks" help="View Tasks">
+                            <field string="Tasks" name="task_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_burndown" icon="fa-line-chart" help="Open Burndown">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Burndown</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_burnup" icon="fa-area-chart" help="Open Burnup">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Burnup</span>
+                            </div>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="project_id"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="goal"/>
+                            <field name="capacity_hours"/>
+                        </group>
+                        <group>
+                            <field name="committed_hours" readonly="1"/>
+                            <field name="completed_hours" readonly="1"/>
+                            <field name="remaining_hours" readonly="1"/>
+                            <field name="consumed_hours" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tasks">
+                            <field name="task_ids" context="{'default_project_id': project_id}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="project_id" readonly="1"/>
+                                    <field name="user_ids"/>
+                                    <field name="allocated_hours"/>
+                                    <field name="state"/>
+                                    <field name="stage_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action and Menu -->
+    <record id="action_project_sprint" model="ir.actions.act_window">
+        <field name="name">Sprints</field>
+        <field name="res_model">project.sprint</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{"search_default_group_by_project_id": 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">Create your first sprint</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_project_sprints" name="Sprints" parent="project.menu_project_management" action="action_project_sprint" sequence="3"/>
+
+</odoo>

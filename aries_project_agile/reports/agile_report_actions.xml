@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dedicated search view for Agile Burndown/Burnup to avoid inheritance issues -->
+    <record id="project_task_burndown_chart_report_view_search_agile" model="ir.ui.view">
+        <field name="name">project.task.burndown.chart.report.view.search.agile</field>
+        <field name="model">project.task.burndown.chart.report</field>
+        <field name="arch" type="xml">
+            <search string="Burndown Chart">
+                <field name="tag_ids"/>
+                <field name="user_ids"/>
+                <field name="stage_id"/>
+                <field name="is_closed"/>
+                <field name="project_id"/>
+                <field name="sprint_id"/>
+                <field name="milestone_id" groups="project.group_project_milestone"/>
+                <field name="partner_id" filter_domain="[('partner_id', 'child_of', self)]"/>
+                <separator/>
+                <filter string="My Tasks" name="my_tasks" domain="[('user_ids', 'in', uid)]"/>
+                <filter string="Unassigned" name="unassigned" domain="[('user_ids', '=', False)]"/>
+                <separator/>
+                <filter name="filter_date" date="date" string="Date" default_period="year,year-1"/>
+                <filter name="filter_last_stage_update" date="date_last_stage_update"/>
+                <filter name="filter_date_deadline" date="date_deadline"/>
+                <separator/>
+                <filter string="Open Tasks" name="open_tasks" domain="[('is_closed', '=', 'open')]"/>
+                <filter string="Closed Tasks" name="closed_tasks" domain="[('is_closed', '=', 'closed')]"/>
+                <group>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date:week'}"/>
+                    <filter string="Stage (Burndown Chart)" name="group_by_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Is Closed (Burn-up Chart)" name="group_by_is_closed" context="{'group_by': 'is_closed'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Dedicated action for Sprint Burndown -->
+    <record id="action_project_agile_sprint_burndown" model="ir.actions.act_window">
+        <field name="name">Sprint Burndown</field>
+        <field name="res_model">project.task.burndown.chart.report</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="project_task_burndown_chart_report_view_search_agile"/>
+        <field name="context">{
+            'search_default_group_by_date': 1,
+            'search_default_group_by_stage': 1,
+            'search_default_filter_date': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No data yet!</p>
+        </field>
+    </record>
+
+    <!-- Dedicated action for Sprint Burnup -->
+    <record id="action_project_agile_sprint_burnup" model="ir.actions.act_window">
+        <field name="name">Sprint Burnup</field>
+        <field name="res_model">project.task.burndown.chart.report</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="project_task_burndown_chart_report_view_search_agile"/>
+        <field name="context">{
+            'search_default_group_by_date': 1,
+            'search_default_group_by_is_closed': 1,
+            'search_default_filter_date': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No data yet!</p>
+        </field>
+    </record>
+
+    <!-- Disable sample data on burndown chart to prevent crash on empty sprints -->
+    <record id="project_task_burndown_chart_report_view_graph_inherit_agile" model="ir.ui.view">
+        <field name="name">project.task.burndown.chart.report.view.graph.inherit.agile</field>
+        <field name="model">project.task.burndown.chart.report</field>
+        <field name="inherit_id" ref="project.project_task_burndown_chart_report_view_graph"/>
+        <field name="arch" type="xml">
+            <xpath expr="//graph" position="attributes">
+                <attribute name="sample">0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Velocity report on sprints (Completed vs Committed Hours) -->
+    <record id="view_project_sprint_velocity_graph" model="ir.ui.view">
+        <field name="name">project.sprint.velocity.graph</field>
+        <field name="model">project.sprint</field>
+        <field name="arch" type="xml">
+            <graph string="Velocity" type="bar" stacked="True">
+                <field name="start_date" interval="week"/>
+                <field name="completed_hours" type="measure"/>
+                <field name="committed_hours" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_project_sprint_velocity" model="ir.actions.act_window">
+        <field name="name">Sprint Velocity</field>
+        <field name="res_model">project.sprint</field>
+        <field name="view_mode">graph,list,form</field>
+        <field name="view_id" ref="view_project_sprint_velocity_graph"/>
+        <field name="context">{"search_default_group_by_project_id": 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">Velocity compares completed vs committed hours per sprint.</p>
+        </field>
+    </record>
+
+    <!-- Capacity vs Commitment on sprints (Capacity vs Committed Hours) -->
+    <record id="view_project_sprint_capacity_graph" model="ir.ui.view">
+        <field name="name">project.sprint.capacity.graph</field>
+        <field name="model">project.sprint</field>
+        <field name="arch" type="xml">
+            <graph string="Capacity vs Commitment" type="bar" stacked="False">
+                <field name="start_date" interval="week"/>
+                <field name="capacity_hours" type="measure"/>
+                <field name="committed_hours" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_project_sprint_capacity" model="ir.actions.act_window">
+        <field name="name">Capacity vs Commitment</field>
+        <field name="res_model">project.sprint</field>
+        <field name="view_mode">graph,list,form</field>
+        <field name="view_id" ref="view_project_sprint_capacity_graph"/>
+        <field name="context">{"search_default_group_by_project_id": 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">Compare team capacity against committed workload per sprint.</p>
+        </field>
+    </record>
+
+    <!-- CFD using burndown dataset grouped by stage over time -->
+    <record id="action_project_sprint_cfd" model="ir.actions.act_window">
+        <field name="name">Sprint CFD</field>
+        <field name="res_model">project.task.burndown.chart.report</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="project.project_task_burndown_chart_report_view_search"/>
+        <field name="context">{"group_by": ["date:day", "stage_id"]}</field>
+        <field name="domain">[("sprint_id", "!=", False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">Cumulative Flow Diagram by sprint and stage.</p>
+        </field>
+    </record>
+
+    <!-- Current Sprints Burndown -->
+    <record id="action_project_sprint_burndown_all" model="ir.actions.act_window">
+        <field name="name">Current Burndown</field>
+        <field name="res_model">project.task.burndown.chart.report</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="project.project_task_burndown_chart_report_view_search"/>
+        <field name="context">{"search_default_sprint_id": 1, "group_by": ["date:day", "stage_id"]}</field>
+        <field name="domain">[("sprint_id.state", "=", "active")]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">Burndown for all currently active sprints.</p>
+        </field>
+    </record>
+
+    <!-- Menus under Project > Reporting -->
+    <menuitem id="menu_project_report_burndown" name="Current Burndown" parent="project.menu_project_report" action="action_project_sprint_burndown_all" sequence="10"/>
+    <menuitem id="menu_project_report_velocity" name="Sprint Velocity" parent="project.menu_project_report" action="action_project_sprint_velocity" sequence="11"/>
+    <menuitem id="menu_project_report_capacity" name="Capacity vs Commitment" parent="project.menu_project_report" action="action_project_sprint_capacity" sequence="12"/>
+    <menuitem id="menu_project_report_cfd" name="Sprint CFD" parent="project.menu_project_report" action="action_project_sprint_cfd" sequence="13"/>
+</odoo>

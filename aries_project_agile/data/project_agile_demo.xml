@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Demo Project -->
+    <record id="project_agile_demo_project" model="project.project">
+        <field name="name">Agile Demo Project</field>
+    </record>
+
+    <!-- Demo Sprints -->
+    <record id="project_agile_demo_sprint_1" model="project.sprint">
+        <field name="name">Sprint 1</field>
+        <field name="project_id" ref="project_agile_demo_project"/>
+        <field name="start_date">2026-01-01</field>
+        <field name="end_date">2026-01-14</field>
+        <field name="capacity_hours">160</field>
+        <field name="state">closed</field>
+    </record>
+
+    <record id="project_agile_demo_sprint_2" model="project.sprint">
+        <field name="name">Sprint 2</field>
+        <field name="project_id" ref="project_agile_demo_project"/>
+        <field name="start_date">2026-01-15</field>
+        <field name="end_date">2026-01-28</field>
+        <field name="capacity_hours">160</field>
+        <field name="state">active</field>
+    </record>
+
+    <!-- Demo Tasks -->
+    <record id="project_agile_demo_task_1" model="project.task">
+        <field name="name">Set up CI</field>
+        <field name="project_id" ref="project_agile_demo_project"/>
+        <field name="allocated_hours">8</field>
+        <field name="sprint_id" ref="project_agile_demo_sprint_1"/>
+        <field name="state">1_done</field>
+    </record>
+    <record id="project_agile_demo_task_2" model="project.task">
+        <field name="name">Implement login</field>
+        <field name="project_id" ref="project_agile_demo_project"/>
+        <field name="allocated_hours">16</field>
+        <field name="sprint_id" ref="project_agile_demo_sprint_1"/>
+        <field name="state">1_done</field>
+    </record>
+    <record id="project_agile_demo_task_3" model="project.task">
+        <field name="name">User profile page</field>
+        <field name="project_id" ref="project_agile_demo_project"/>
+        <field name="allocated_hours">20</field>
+        <field name="sprint_id" ref="project_agile_demo_sprint_2"/>
+    </record>
+    <record id="project_agile_demo_task_4" model="project.task">
+        <field name="name">Email notifications</field>
+        <field name="project_id" ref="project_agile_demo_project"/>
+        <field name="allocated_hours">12</field>
+        <field name="sprint_id" ref="project_agile_demo_sprint_2"/>
+    </record>
+</odoo>

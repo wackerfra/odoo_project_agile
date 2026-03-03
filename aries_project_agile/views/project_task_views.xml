@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Task form inheritance to add sprint_id -->
+    <record id="view_task_form2_inherit_sprint" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.sprint</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='project_id']" position="after">
+                <field name="sprint_id" options="{'no_create_edit': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Task Search view inheritance -->
+    <record id="view_task_search_form_inherit_sprint" model="ir.ui.view">
+        <field name="name">project.task.search.inherit.sprint</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='project_id']" position="after">
+                <field name="sprint_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='my_tasks']" position="after">
+                <filter string="Active Sprint" name="sprint_active" domain="[('sprint_id.state', '=', 'active')]"/>
+                <filter string="Planned Sprint" name="sprint_planned" domain="[('sprint_id.state', '=', 'planned')]"/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Sprint" name="group_by_sprint_id" context="{'group_by': 'sprint_id'}"/>
+            </xpath>
+            <xpath expr="//search" position="inside">
+                <searchpanel>
+                    <field name="sprint_id" icon="fa-tasks" enable_counters="1" select="multi"/>
+                </searchpanel>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Specific Kanban view for Sprint Planning (groups by sprint) -->
+    <record id="view_task_kanban_sprint_planning" model="ir.ui.view">
+        <field name="name">project.task.kanban.sprint.planning</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="sprint_id" class="o_kanban_small_column" sample="1">
+                <field name="color"/>
+                <field name="priority"/>
+                <field name="stage_id"/>
+                <field name="user_ids"/>
+                <field name="project_id"/>
+                <field name="sprint_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{'oe_kanban_color_' + kanban_getcolor(record.color.raw_value)}} oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="project_id" invisible="context.get('default_project_id')"/>
+                                    <field name="tag_ids" widget="many2many_tags"/>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="priority" widget="priority"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="user_ids" widget="many2many_avatar_user"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Sprint planning board action -->
+    <record id="action_project_task_sprint_planning" model="ir.actions.act_window">
+        <field name="name">Sprint Planning</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="view_task_kanban_sprint_planning"/>
+        <field name="context">{
+            "search_default_group_by_sprint_id": 1,
+            "group_by": ["sprint_id"],
+            "searchpanel_default_group_by": "sprint_id"
+        }</field>
+        <field name="domain">[]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">Plan tasks by dragging them from Backlog to the current sprint.</p>
+        </field>
+    </record>
+
+    <!-- Active Sprint Board Action (Tasks grouped by Stage) -->
+    <record id="action_project_task_active_sprint" model="ir.actions.act_window">
+        <field name="name">Active Sprint Board</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{
+            "search_default_sprint_active": 1,
+        }</field>
+        <field name="domain">[('sprint_id.state', '=', 'active')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">The Active Sprint Board shows the progress of the current sprint.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_project_active_sprint" name="Active Sprint" parent="project.menu_project_management" action="action_project_task_active_sprint" sequence="0"/>
+    <menuitem id="menu_project_sprint_planning" name="Sprint Planning" parent="project.menu_project_management" action="action_project_task_sprint_planning" sequence="1"/>
+
+</odoo>
