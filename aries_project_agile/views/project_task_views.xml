@@ -41,7 +41,7 @@
         <field name="name">project.task.kanban.sprint.planning</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="sprint_id" class="o_kanban_small_column" sample="1">
+            <kanban default_group_by="sprint_id" class="o_kanban_small_column" sample="1" highlight_color="color">
                 <field name="color"/>
                 <field name="priority"/>
                 <field name="stage_id"/>
@@ -49,8 +49,8 @@
                 <field name="project_id"/>
                 <field name="sprint_id"/>
                 <templates>
-                    <t t-name="kanban-box">
-                        <div t-attf-class="{{'oe_kanban_color_' + kanban_getcolor(record.color.raw_value)}} oe_kanban_card oe_kanban_global_click">
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
                             <div class="oe_kanban_content">
                                 <div class="o_kanban_record_top">
                                     <div class="o_kanban_record_headings">
